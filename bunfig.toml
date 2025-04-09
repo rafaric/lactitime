@@ -1,0 +1,12 @@
+[install]
+
+registry = "https://registry.npmjs.org"
+prefer-offline = true
+
+[install.scopes]
+
+[install.cache]
+dir = ".bun/cache"
+
+[install.lockfile]
+filename = "bun.lockb"

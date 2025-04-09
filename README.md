@@ -1,36 +1,22 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lacti Time
 
-## Getting Started
+**Lacti Time** es una aplicación móvil diseñada para ayudar a madres lactantes a gestionar su banco de leche materna de manera sencilla y organizada cuando vuelven al trabajo.
 
-First, run the development server:
+## Descripción del proyecto
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+La app permite:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Registrar la extracción de leche.
+- Establecer fechas de vencimiento según el método de almacenamiento.
+- Recibir notificaciones.
+- Acceder a información útil sobre la conservación y uso adecuado de la leche.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Objetivo General
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Facilitar el control y gestión de stock de leche materna especialmente durante la vuelta al trabajo, proporcionando herramientas que optimicen el seguimiento, almacenamiento y utilización adecuada de la leche, garantizando una alimentación saludable y continua para el bebé.
 
-## Learn More
+## Objetivos Específicos
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Registro y control de stock:** Permitir a la madre registrar y gestionar las cantidades de leche materna extraída y almacenada, incluyendo detalles como fecha, hora, cantidad, entre otros.
+- **Seguimiento de la caducidad:** Proveer alarmas/recordatorios sobre la fecha de caducidad.
+- **Optimización del almacenaje:** Sugerir métodos de almacenamiento (temperatura ideal, tipos de envases) que aseguren la calidad y durabilidad de la leche.
