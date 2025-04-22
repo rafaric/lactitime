@@ -1,4 +1,5 @@
 import Link from "next/link";
+import image from "../../public/extraccionManual.jpg";
 import {
   ArrowLeft,
   CalendarDays,
@@ -22,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
 
 export default function RecursosPage() {
   return (
@@ -54,29 +56,7 @@ export default function RecursosPage() {
                   <AccordionItem value="item-1">
                     <AccordionTrigger>Extracción manual</AccordionTrigger>
                     <AccordionContent>
-                      <p className="text-sm leading-relaxed mb-2">
-                        La extracción manual es una técnica que no requiere
-                        equipos especiales. Para realizarla correctamente:
-                      </p>
-                      <ol className="text-sm list-decimal pl-5 space-y-2">
-                        <li>Lávate bien las manos antes de comenzar.</li>
-                        <li>
-                          Masajea suavemente el pecho en forma circular para
-                          estimular el flujo de leche.
-                        </li>
-                        <li>
-                          Coloca el pulgar y los dedos en forma de C alrededor
-                          de la areola.
-                        </li>
-                        <li>
-                          Presiona hacia atrás (hacia las costillas) y luego
-                          comprime rítmicamente.
-                        </li>
-                        <li>
-                          Rota la posición de los dedos para vaciar diferentes
-                          conductos.
-                        </li>
-                      </ol>
+                      <Image alt="extraccion manual" src={image} />
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-2">
