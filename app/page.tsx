@@ -35,7 +35,7 @@ export default function HomePage() {
   return (
     <div className="container max-w-md mx-auto px-4 py-8">
       <header className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-rose-600">MilkTracker</h1>
+        <h1 className="text-4xl font-bold text-rose-600">LactiTime</h1>
         <p className="text-muted-foreground mt-2">
           Organiza y registra tu leche materna
         </p>
