@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -14,19 +15,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useApp } from "@/context/app-context";
 
 export default function CalendarioPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  // Datos de ejemplo
-  const extracciones = [
-    { fecha: "2025-04-01", cantidad: 60 },
-    { fecha: "2025-04-02", cantidad: 75 },
-    { fecha: "2025-04-03", cantidad: 80 },
-    { fecha: "2025-04-05", cantidad: 65 },
-    { fecha: "2025-04-07", cantidad: 70 },
-    { fecha: "2025-04-08", cantidad: 140 },
-  ];
+  const { extracciones } = useApp();
+  const router = useRouter();
 
   const getDaysInMonth = (year: number, month: number) => {
     return new Date(year, month + 1, 0).getDate();
@@ -47,6 +41,29 @@ export default function CalendarioPage() {
       new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
     );
   };
+
+  const handleDayClick = (dateStr: string) => {
+    // Navegar a la página de extracciones con la fecha seleccionada
+    router.push(`/extracciones?fecha=${dateStr}`);
+  };
+
+  // Calcular estadísticas mensuales
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+
+  const extraccionesMes = extracciones.filter((e) => {
+    const fecha = new Date(e.fecha);
+    return fecha.getFullYear() === year && fecha.getMonth() === month;
+  });
+
+  const totalExtraidoMes = extraccionesMes.reduce(
+    (sum, e) => sum + e.cantidad,
+    0
+  );
+  const diasRegistrados = new Set(extraccionesMes.map((e) => e.fecha)).size;
+  const promedioDiario =
+    diasRegistrados > 0 ? Math.round(totalExtraidoMes / diasRegistrados) : 0;
+  const totalExtracciones = extraccionesMes.length;
 
   const renderCalendar = () => {
     const year = currentMonth.getFullYear();
@@ -80,11 +97,20 @@ export default function CalendarioPage() {
       days.push(
         <div
           key={day}
-          className="relative h-10 w-10 flex flex-col items-center justify-center"
+          className={`relative h-10 w-10 flex flex-col items-center justify-center rounded-full 
+            ${
+              extraccionesDelDia.length > 0
+                ? "cursor-pointer hover:bg-rose-100"
+                : ""
+            }
+          `}
+          onClick={() =>
+            extraccionesDelDia.length > 0 && handleDayClick(dateStr)
+          }
         >
           <span
             className={`text-sm ${
-              extraccionesDelDia.length > 0 ? "font-bold" : ""
+              extraccionesDelDia.length > 0 ? "font-bold text-rose-600" : ""
             }`}
           >
             {day}
@@ -146,25 +172,33 @@ export default function CalendarioPage() {
           <Card>
             <CardContent className="py-4 text-center">
               <p className="text-muted-foreground text-sm">Total extraído</p>
-              <p className="text-2xl font-bold text-rose-600">490 ml</p>
+              <p className="text-2xl font-bold text-rose-600">
+                {totalExtraidoMes} ml
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="py-4 text-center">
               <p className="text-muted-foreground text-sm">Promedio diario</p>
-              <p className="text-2xl font-bold text-rose-600">82 ml</p>
+              <p className="text-2xl font-bold text-rose-600">
+                {promedioDiario} ml
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="py-4 text-center">
               <p className="text-muted-foreground text-sm">Días registrados</p>
-              <p className="text-2xl font-bold text-rose-600">6</p>
+              <p className="text-2xl font-bold text-rose-600">
+                {diasRegistrados}
+              </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="py-4 text-center">
               <p className="text-muted-foreground text-sm">Extracciones</p>
-              <p className="text-2xl font-bold text-rose-600">12</p>
+              <p className="text-2xl font-bold text-rose-600">
+                {totalExtracciones}
+              </p>
             </CardContent>
           </Card>
         </div>

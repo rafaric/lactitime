@@ -2,8 +2,9 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   CalendarDays,
@@ -11,6 +12,7 @@ import {
   Home,
   Info,
   Plus,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,54 +27,61 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useApp } from "@/context/app-context";
+import { Badge } from "@/components/ui/badge";
 
 export default function ExtraccionesPage() {
-  const [extracciones, setExtracciones] = useState([
-    {
-      id: 1,
-      fecha: "2025-04-08",
-      hora: "08:30",
-      cantidad: 60,
-      metodo: "Manual",
-    },
-    {
-      id: 2,
-      fecha: "2025-04-08",
-      hora: "14:15",
-      cantidad: 80,
-      metodo: "Extractor eléctrico",
-    },
-    {
-      id: 3,
-      fecha: "2025-04-07",
-      hora: "19:45",
-      cantidad: 70,
-      metodo: "Extractor manual",
-    },
-  ]);
+  const { extracciones, agregarExtraccion } = useApp();
+  const searchParams = useSearchParams();
+  const fechaFiltro = searchParams.get("fecha");
 
   const [open, setOpen] = useState(false);
   const [fecha, setFecha] = useState("");
   const [hora, setHora] = useState("");
   const [cantidad, setCantidad] = useState("");
   const [metodo, setMetodo] = useState("Manual");
+  const [extraccionesFiltradas, setExtraccionesFiltradas] =
+    useState(extracciones);
+
+  // Aplicar filtro cuando cambie la fecha o las extracciones
+  useEffect(() => {
+    if (fechaFiltro) {
+      setExtraccionesFiltradas(
+        extracciones.filter((e) => e.fecha === fechaFiltro)
+      );
+    } else {
+      setExtraccionesFiltradas(extracciones);
+    }
+  }, [extracciones, fechaFiltro]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nuevaExtraccion = {
-      id: extracciones.length + 1,
+
+    agregarExtraccion({
       fecha,
       hora,
       cantidad: Number.parseInt(cantidad),
       metodo,
-    };
-    setExtracciones([nuevaExtraccion, ...extracciones]);
+    });
+
     setOpen(false);
     // Reset form
     setFecha("");
     setHora("");
     setCantidad("");
     setMetodo("Manual");
+  };
+
+  // Formatear la fecha para mostrarla en el título
+  const formatearFecha = (fechaStr: string) => {
+    // Asegurarnos de que la fecha se interprete en la zona horaria local
+    const [year, month, day] = fechaStr.split("-").map(Number);
+    const fecha = new Date(year, month - 1, day);
+    return fecha.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   return (
@@ -84,8 +93,27 @@ export default function ExtraccionesPage() {
         <h1 className="text-xl font-bold">Registro de Extracciones</h1>
       </header>
 
+      {fechaFiltro && (
+        <div className="mb-4 flex items-center justify-between">
+          <Badge
+            variant="outline"
+            className="px-3 py-1 text-rose-600 border-rose-200 bg-rose-50"
+          >
+            {formatearFecha(fechaFiltro)}
+          </Badge>
+          <Link href="/extracciones">
+            <Button variant="ghost" size="sm" className="h-8 gap-1">
+              <X className="h-4 w-4" />
+              Quitar filtro
+            </Button>
+          </Link>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-medium">Historial</h2>
+        <h2 className="text-lg font-medium">
+          {fechaFiltro ? `Extracciones del día` : "Historial"}
+        </h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="flex items-center gap-1">
@@ -103,7 +131,7 @@ export default function ExtraccionesPage() {
                 <Input
                   id="fecha"
                   type="date"
-                  value={fecha}
+                  value={fecha || fechaFiltro || ""}
                   onChange={(e) => setFecha(e.target.value)}
                   required
                 />
@@ -162,35 +190,51 @@ export default function ExtraccionesPage() {
         </Dialog>
       </div>
 
-      <div className="space-y-3">
-        {extracciones.map((extraccion) => (
-          <Card key={extraccion.id}>
-            <CardHeader className="py-3">
-              <CardTitle className="text-sm font-medium flex justify-between">
-                <span>
-                  {new Date(extraccion.fecha).toLocaleDateString("es-ES", {
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </span>
-                <span>{extraccion.hora}</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="py-2">
-              <div className="flex justify-between text-sm">
-                <div>
-                  <p className="text-muted-foreground">Cantidad</p>
-                  <p className="font-medium">{extraccion.cantidad} ml</p>
+      {extraccionesFiltradas.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            No hay extracciones registradas {fechaFiltro ? "para este día" : ""}
+            .
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {extraccionesFiltradas.map((extraccion) => (
+            <Card key={extraccion.id}>
+              <CardHeader className="py-3">
+                <CardTitle className="text-sm font-medium flex justify-between">
+                  <span>
+                    {!fechaFiltro &&
+                      (() => {
+                        const [year, month, day] = extraccion.fecha
+                          .split("-")
+                          .map(Number);
+                        const fecha = new Date(year, month - 1, day);
+                        return fecha.toLocaleDateString("es-ES", {
+                          day: "numeric",
+                          month: "short",
+                        });
+                      })()}
+                  </span>
+                  <span>{extraccion.hora}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <div className="flex justify-between text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Cantidad</p>
+                    <p className="font-medium">{extraccion.cantidad} ml</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Método</p>
+                    <p className="font-medium">{extraccion.metodo}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Método</p>
-                  <p className="font-medium">{extraccion.metodo}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <nav className="fixed bottom-0 left-0 right-0 bg-background border-t py-2 px-4">
         <div className="flex justify-around max-w-md mx-auto">

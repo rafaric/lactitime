@@ -32,31 +32,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useApp } from "@/context/app-context";
 
 export default function AlmacenamientoPage() {
-  const [almacenados, setAlmacenados] = useState([
-    {
-      id: 1,
-      fecha: "2025-04-07",
-      cantidad: 150,
-      ubicacion: "Refrigerador",
-      etiqueta: "Mañana",
-    },
-    {
-      id: 2,
-      fecha: "2025-04-06",
-      cantidad: 180,
-      ubicacion: "Congelador",
-      etiqueta: "Tarde",
-    },
-    {
-      id: 3,
-      fecha: "2025-04-05",
-      cantidad: 120,
-      ubicacion: "Congelador",
-      etiqueta: "Noche",
-    },
-  ]);
+  const {
+    almacenados,
+    agregarAlmacenamiento,
+    eliminarAlmacenamiento,
+    obtenerTotalAlmacenado,
+  } = useApp();
 
   const [open, setOpen] = useState(false);
   const [fecha, setFecha] = useState("");
@@ -64,26 +48,27 @@ export default function AlmacenamientoPage() {
   const [ubicacion, setUbicacion] = useState("Refrigerador");
   const [etiqueta, setEtiqueta] = useState("");
 
+  // Obtener totales para mostrar en el resumen
+  const totalRefrigerador = obtenerTotalAlmacenado("Refrigerador");
+  const totalCongelador = obtenerTotalAlmacenado("Congelador");
+  const totalGeneral = obtenerTotalAlmacenado();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const nuevoAlmacenamiento = {
-      id: almacenados.length + 1,
+
+    agregarAlmacenamiento({
       fecha,
       cantidad: Number.parseInt(cantidad),
       ubicacion,
       etiqueta,
-    };
-    setAlmacenados([nuevoAlmacenamiento, ...almacenados]);
+    });
+
     setOpen(false);
     // Reset form
     setFecha("");
     setCantidad("");
     setUbicacion("Refrigerador");
     setEtiqueta("");
-  };
-
-  const eliminarAlmacenamiento = (id: number) => {
-    setAlmacenados(almacenados.filter((item) => item.id !== id));
   };
 
   return (
@@ -103,15 +88,15 @@ export default function AlmacenamientoPage() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm">Refrigerador</span>
-              <span className="font-medium">150 ml</span>
+              <span className="font-medium">{totalRefrigerador}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Congelador</span>
-              <span className="font-medium">300 ml</span>
+              <span className="font-medium">{totalCongelador}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Total</span>
-              <span className="font-medium">450 ml</span>
+              <span className="font-medium">{totalGeneral}</span>
             </div>
           </div>
         </CardContent>
@@ -187,10 +172,16 @@ export default function AlmacenamientoPage() {
             <CardHeader className="py-3">
               <CardTitle className="text-sm font-medium flex justify-between">
                 <span>
-                  {new Date(item.fecha).toLocaleDateString("es-ES", {
-                    day: "numeric",
-                    month: "short",
-                  })}
+                  {(() => {
+                    const [year, month, day] = item.fecha
+                      .split("-")
+                      .map(Number);
+                    const fecha = new Date(year, month - 1, day);
+                    return fecha.toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "short",
+                    });
+                  })()}
                 </span>
                 <span>{item.etiqueta}</span>
               </CardTitle>
