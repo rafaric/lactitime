@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MilkTracker - Organiza tu leche materna",
+  title: "LactiTime - Organiza tu leche materna",
   description:
     "Aplicación para organizar y registrar la extracción de leche materna",
 };
