@@ -34,6 +34,9 @@ type AppContextType = {
   eliminarAlmacenamiento: (id: number) => void;
   obtenerTotalExtracciones: (periodo?: "hoy" | "semana" | "mes") => number;
   obtenerTotalAlmacenado: (ubicacion?: string) => number;
+  obtenerAlmacenamientosProximosAVencer: () => Almacenamiento[];
+  obtenerAlmacenamientosVencidos: () => Almacenamiento[];
+  calcularDiasRestantes: (almacenamiento: Almacenamiento) => number;
 };
 
 // Crear el contexto
@@ -84,24 +87,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAlmacenados(JSON.parse(loadedAlmacenados));
     } else {
       // Datos de ejemplo si no hay nada guardado
+      const hoy = new Date();
+      const hace3Dias = new Date(hoy);
+      hace3Dias.setDate(hoy.getDate() - 3);
+
+      const hace5Meses = new Date(hoy);
+      hace5Meses.setMonth(hoy.getMonth() - 5);
+      hace5Meses.setDate(hoy.getDate() - 25); // 5 meses y 25 días (casi 6 meses)
+
       setAlmacenados([
         {
           id: 1,
-          fecha: "2025-04-07",
+          fecha: hoy.toISOString().split("T")[0],
           cantidad: 150,
           ubicacion: "Refrigerador",
           etiqueta: "Mañana",
         },
         {
           id: 2,
-          fecha: "2025-04-06",
+          fecha: hace3Dias.toISOString().split("T")[0],
           cantidad: 180,
-          ubicacion: "Congelador",
+          ubicacion: "Refrigerador",
           etiqueta: "Tarde",
         },
         {
           id: 3,
-          fecha: "2025-04-05",
+          fecha: hace5Meses.toISOString().split("T")[0],
           cantidad: 120,
           ubicacion: "Congelador",
           etiqueta: "Noche",
@@ -182,6 +193,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .reduce((total, item) => total + item.cantidad, 0);
   };
 
+  // Función para calcular días restantes de un almacenamiento
+  const calcularDiasRestantes = (almacenamiento: Almacenamiento) => {
+    const fechaAlmacenamiento = new Date(almacenamiento.fecha);
+    const hoy = new Date();
+
+    // Asegurarnos de que ambas fechas estén en el mismo formato (sin horas)
+    fechaAlmacenamiento.setHours(0, 0, 0, 0);
+    hoy.setHours(0, 0, 0, 0);
+
+    // Calcular la diferencia en días
+    const diferenciaMilisegundos =
+      hoy.getTime() - fechaAlmacenamiento.getTime();
+    const diasTranscurridos = Math.floor(
+      diferenciaMilisegundos / (1000 * 60 * 60 * 24)
+    );
+
+    // Definir límites según ubicación
+    const diasLimite = almacenamiento.ubicacion === "Refrigerador" ? 4 : 180; // 4 días para refrigerador, 6 meses (180 días) para congelador
+
+    return diasLimite - diasTranscurridos;
+  };
+
+  // Función para obtener almacenamientos próximos a vencer
+  const obtenerAlmacenamientosProximosAVencer = () => {
+    return almacenados.filter((item) => {
+      const diasRestantes = calcularDiasRestantes(item);
+      if (item.ubicacion === "Refrigerador") {
+        return diasRestantes > 0 && diasRestantes <= 1; // Advertencia 1 día antes para refrigerador
+      } else {
+        return diasRestantes > 0 && diasRestantes <= 7; // Advertencia 1 semana antes para congelador
+      }
+    });
+  };
+
+  // Función para obtener almacenamientos vencidos
+  const obtenerAlmacenamientosVencidos = () => {
+    return almacenados.filter((item) => calcularDiasRestantes(item) <= 0);
+  };
+
   // Valor del contexto
   const value = {
     extracciones,
@@ -191,6 +241,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     eliminarAlmacenamiento,
     obtenerTotalExtracciones,
     obtenerTotalAlmacenado,
+    obtenerAlmacenamientosProximosAVencer,
+    obtenerAlmacenamientosVencidos,
+    calcularDiasRestantes,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

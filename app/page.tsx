@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { CalendarDays, Droplets, Home, Info } from "lucide-react";
 
@@ -9,16 +11,57 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useApp } from "@/context/app-context";
+import { AlertaVencimiento } from "@/components/alerta-vencimiento";
 
 export default function HomePage() {
+  const {
+    obtenerTotalExtracciones,
+    obtenerTotalAlmacenado,
+    obtenerAlmacenamientosProximosAVencer,
+    obtenerAlmacenamientosVencidos,
+  } = useApp();
+
+  // Obtener totales para mostrar en el dashboard
+  const totalHoy = obtenerTotalExtracciones("hoy");
+  const totalSemana = obtenerTotalExtracciones("semana");
+  const totalAlmacenado = obtenerTotalAlmacenado();
+
+  // Obtener almacenamientos que requieren atención
+  const proximosAVencer = obtenerAlmacenamientosProximosAVencer();
+  const vencidos = obtenerAlmacenamientosVencidos();
+  const hayAlertas = proximosAVencer.length > 0 || vencidos.length > 0;
+
   return (
     <div className="container max-w-md mx-auto px-4 py-8">
       <header className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-rose-600">LactiTime</h1>
+        <h1 className="text-2xl font-bold text-rose-600">MilkTracker</h1>
         <p className="text-muted-foreground mt-2">
           Organiza y registra tu leche materna
         </p>
       </header>
+
+      {hayAlertas && (
+        <div className="mb-6 space-y-3">
+          <h2 className="text-lg font-medium">Alertas</h2>
+
+          {vencidos.length > 0 && (
+            <div className="space-y-2">
+              {vencidos.map((item) => (
+                <AlertaVencimiento key={item.id} almacenamiento={item} />
+              ))}
+            </div>
+          )}
+
+          {proximosAVencer.length > 0 && (
+            <div className="space-y-2">
+              {proximosAVencer.map((item) => (
+                <AlertaVencimiento key={item.id} almacenamiento={item} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-4">
         <Card>
@@ -30,15 +73,15 @@ export default function HomePage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Hoy</span>
-                <span className="font-medium">120 ml</span>
+                <span className="font-medium">{totalHoy} ml</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Esta semana</span>
-                <span className="font-medium">840 ml</span>
+                <span className="font-medium">{totalSemana} ml</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Almacenado</span>
-                <span className="font-medium">450 ml</span>
+                <span className="font-medium">{totalAlmacenado} ml</span>
               </div>
             </div>
           </CardContent>
