@@ -4,7 +4,7 @@
 
 ## Descripción del proyecto
 
-La app mes permite:
+La app me permite:
 
 - Registrar la extracción de leche.
 - Establecer fechas de vencimiento según el método de almacenamiento.
